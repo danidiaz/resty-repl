@@ -1,7 +1,9 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ApplicativeDo #-}
 module RestyRepl (
-        repl
+        Line
+    ,   History
+    ,   repl
     ) where
 
 import           Data.Sequence
@@ -26,12 +28,13 @@ import           System.Process.Streaming.Text ( asUtf8x
 import           Pipes
 import qualified Pipes.Prelude
 
-type History = Seq Data.Text.Lazy.Text
+type Line    = Data.Text.Lazy.Text
+type History = Seq Line
 
 -- | Given the full path to an executable and the arguments it should take,
---   return a function to write to stdin, a function to read the full
---   history of the REPL session, and an `IO` action to actually start the
---   session.
+--   return a function to write to stdin, an action that gets
+--   history of the REPL session, and an action that actually executes
+--   REPL session.
 repl :: FilePath 
      -> [String] 
      -> IO (Text -> IO (), IO History, IO ())
