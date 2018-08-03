@@ -14,4 +14,5 @@ To run:
 
 # Motivation
 
-[This seemed like a good idea](https://www.reddit.com/r/haskell/comments/948s9q/running_ghci_in_background/).
+[This seemed like a good
+idea](https://www.reddit.com/r/haskell/comments/948s9q/running_ghci_in_background/).

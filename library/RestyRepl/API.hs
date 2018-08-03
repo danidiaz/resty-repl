@@ -3,7 +3,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module RestyRepl.API (
-        ReplAPI
+        ReplAPI,
+        InteractionLink(..)
     ) where
 import           Servant.API
 import           Data.Text
@@ -21,11 +22,11 @@ type CreateInteraction =
     :> Post '[JSON] InteractionLink
 
 type ReadInteraction = 
-       Capture "interactionid" Integer
-    :> Post '[Text] Text
+       Capture "interactionid" Int
+    :> Post '[PlainText] Text
 
 type ReadHistory =  
-       Get '[Text] Text
+       Get '[PlainText] Text
 
 type ReplAPI = "interaction" :> CreateInteraction
           :<|> "interaction" :> ReadInteraction

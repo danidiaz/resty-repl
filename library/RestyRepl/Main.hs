@@ -5,6 +5,8 @@ module RestyRepl.Main (
 import           Options.Applicative
 import qualified Options.Applicative as O
 
+import           Network.Wai.Handler.Warp (run)
+
 data Options = Options
              {
                 executable :: String
