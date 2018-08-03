@@ -12,4 +12,6 @@ To run:
 
     cabal new-exec -- restyrepl --help
 
+# Motivation
 
+[This seemed like a good idea](https://www.reddit.com/r/haskell/comments/948s9q/running_ghci_in_background/).
