@@ -28,7 +28,13 @@ import qualified Pipes.Prelude
 
 type History = Seq Data.Text.Lazy.Text
 
-repl :: FilePath -> [String] -> IO (Text -> IO (), IO History, IO ())
+-- | Given the full path to an executable and the arguments it should take,
+--   return a function to write to stdin, a function to read the full
+--   history of the REPL session, and an `IO` action to actually start the
+--   session.
+repl :: FilePath 
+     -> [String] 
+     -> IO (Text -> IO (), IO History, IO ())
 repl executable arguments = do
     inputQueue <- atomically $ newTQueue @Text
     historyRef <- atomically $ newTVar @History mempty
