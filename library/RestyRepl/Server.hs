@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE BangPatterns #-}
 module RestyRepl.Server (
         replServer
     ) where
@@ -33,23 +34,23 @@ data Segment = Segment
 data Interactions = Interactions 
                   { 
                         nextInteractionId :: !Int
-                  ,     interactionMap :: !IntMap (Input, Segment)
+                  ,     interactionMap :: !(IntMap (Input, Segment))
                   } deriving Show
 
-replServer :: (Text -> IO ()) -> TVar History -> Application
+replServer :: (Text -> STM ()) -> TVar History -> IO Application
 replServer write historyRef = do
     ref <- atomically $ newTVar (Interactions 0 mempty)
-    serve (Proxy @ReplAPI) 
-          (     createInteraction ref historyRef write 
-           :<|> readInteraction ref historyRef
-           :<|> readHistory historyRef)
+    pure $ serve (Proxy @ReplAPI) 
+                 (     createInteraction ref write historyRef 
+                  :<|> readInteraction ref historyRef
+                  :<|> readHistory historyRef)
 
 createInteraction :: TVar Interactions
+                  -> (Text -> STM ()) 
                   -> TVar History 
-                  -> (Text -> IO ()) 
                   -> Text 
                   -> Handler InteractionLink
-createInteraction ref historyRef write = liftIO $ do
+createInteraction ref write historyRef input = liftIO $ do
     interactionId <- atomically $ do
         interactions <- readTVar $ ref
         history <- readTVar $ historyRef
@@ -58,11 +59,11 @@ createInteraction ref historyRef write = liftIO $ do
             interactions' = 
                 interactions { nextInteractionId = succ interactionId 
                              , interactionMap = insert interactionId 
-                                                       (Segment len Nothing)
-                                                       interactionMap
+                                                       (input,Segment len Nothing)
+                                                       (interactionMap interactions)
                              }
+        write input
         undefined -- modifyTVar' 
-    write inputLines
     undefined
 
 readInteraction :: TVar Interactions 

@@ -38,7 +38,7 @@ type History = Seq Line
 --   REPL session.
 repl :: FilePath 
      -> [String] 
-     -> IO (Text -> IO (), TVar History, IO ())
+     -> IO (Text -> STM (), TVar History, IO ())
 repl executable arguments = do
     inputQueue <- atomically $ newTQueue @Text
     historyRef <- atomically $ newTVar @History mempty
@@ -55,7 +55,7 @@ repl executable arguments = do
             withConsumer $ 
             forever (do line <- await
                         liftIO . atomically $ modifyTVar' historyRef (|> line))
-    pure $ (,,) (\text -> atomically (writeTQueue inputQueue text)) 
+    pure $ (,,) (\text -> writeTQueue inputQueue text) 
                 historyRef
                 execution
 
