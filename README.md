@@ -12,24 +12,24 @@ already emitted some output. That it left to the client.
 
 # What are the endpoints?
 
-    - GET `/history` 
-    
-      Shows the repl's stdout from the very beginning. 
+- GET `/history` 
 
-    - POST `/interaction` 
+  Shows the repl's stdout from the very beginning. 
 
-      Sends some command to the REPL.
+- POST `/interaction` 
 
-      The only allowed `Content-Type` is `text/plain; charset=utf-8`.
+  Sends some command to the REPL.
 
-      Returns the link to an "interaction" resource.
+  The only allowed `Content-Type` is `text/plain; charset=utf-8`.
 
-    - POST `/interaction/:id` 
+  Returns the link to an "interaction" resource.
 
-      Shows the repl's stdout from the point the command :id was sent.
+- POST `/interaction/:id` 
 
-      Notice that this shows also the output of further commands sent to the
-      repl!
+  Shows the repl's stdout from the point the command :id was sent.
+
+  Notice that this shows also the output of further commands sent to the
+  repl!
 
 # Building
 
@@ -71,10 +71,10 @@ Remember that you can use `--verbose` with curl for more detailed output.
 
 Many, but among them:
 
-    - stderr from the REPL is silently discarded. Might get confusing if you
-      send an incorrect command and expect to see something on the history.
+- stderr from the REPL is silently discarded. Might get confusing if you
+  send an incorrect command and expect to see something on the history.
 
-    - You can't delete resources.
+- You can't delete resources.
 
 # Motivation
 
