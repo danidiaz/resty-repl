@@ -3,31 +3,37 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module RestyRepl.API (
-        ReplAPI,
-        InteractionLink(..)
+        CreateInteraction
+    ,   ReadInteraction
+    ,   ReadHistory
+    ,   ReplAPI
+    ,   InteractionLink(..)
     ) where
 import           Servant.API
 import           Data.Text
 import qualified Data.Text.Lazy
 import           Data.Aeson
 
-newtype InteractionLink = InteractionLink { interactionLink :: Text }
+newtype InteractionLink = InteractionLink Link
                           deriving (Show)
 
 instance ToJSON InteractionLink where
-    toJSON (InteractionLink link) =  object ["link" .= link]
+    toJSON (InteractionLink link) =  object ["link" .= toUrlPiece link]
 
 type CreateInteraction = 
-       ReqBody '[PlainText] Text
+       "interaction"
+    :> ReqBody '[PlainText] Text
     :> Post '[JSON] InteractionLink
 
 type ReadInteraction = 
-       Capture "interactionid" Int
-    :> Post '[PlainText] Text
+       "interaction"
+    :> Capture "interactionId" Int
+    :> Post '[PlainText] Data.Text.Lazy.Text
 
 type ReadHistory =  
-       Get '[PlainText] Text
+       "history"
+    :> Get '[PlainText] Data.Text.Lazy.Text
 
-type ReplAPI = "interaction" :> CreateInteraction
-          :<|> "interaction" :> ReadInteraction
-          :<|> "history" :> ReadHistory
+type ReplAPI = CreateInteraction
+          :<|> ReadInteraction
+          :<|> ReadHistory
