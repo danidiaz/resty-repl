@@ -33,11 +33,6 @@ data Interaction = Interaction Input !Int
 
 type Interactions = Seq Interaction
 
-addInteraction :: History -> Input -> Interactions -> Interactions
-addInteraction history input interactions =  
-    let interaction = Interaction input (Data.Sequence.length history)
-     in interactions |> interaction 
-
 replServer :: STM History -> (Text -> STM ()) -> IO Application
 replServer historyM write = do
     interactionsV <- atomically $ newTVar mempty
@@ -56,7 +51,7 @@ createInteraction interactionsV historyM write input = liftIO $ do
   key <- atomically $ do
     history <- historyM
     key <- Data.Sequence.length <$> readTVar interactionsV
-    modifyTVar' interactionsV (addInteraction history input)
+    modifyTVar' interactionsV (\is -> is |> Interaction input key)
     write input
     pure key
   pure
