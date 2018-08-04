@@ -50,7 +50,10 @@ backgroundRepl executable arguments = do
              foldOut (asUtf8x (asFoldedLines writeToHistory)))
         producer = 
             forever (do text <- liftIO . atomically $ readTQueue inputQueue
-                        yield text)
+                        liftIO $ print text
+                        yield text
+                        yield (Data.Text.singleton '\r')
+                        yield (Data.Text.singleton '\n'))
         writeToHistory = 
             withConsumer $ 
             forever (do line <- await
