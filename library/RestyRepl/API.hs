@@ -28,7 +28,7 @@ type CreateInteraction =
 type ReadInteraction = 
        "interaction"
     :> Capture "interactionId" Int
-    :> Post '[PlainText] Data.Text.Lazy.Text
+    :> Get '[PlainText] Data.Text.Lazy.Text
 
 type ReadHistory =  
        "history"
