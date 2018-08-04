@@ -7,8 +7,6 @@ module RestyRepl.Server (
 import           Data.Foldable
 import           Data.Sequence
 import qualified Data.Sequence
-import           Data.IntMap.Strict (IntMap,insert)
-import qualified Data.IntMap.Strict
 import           Data.Text
 import qualified Data.Text.Lazy
 import           RestyRepl.API                  ( ReplAPI )
@@ -29,28 +27,24 @@ type History = Seq Line
 
 type Input = Text 
 
--- | What was sent, and at what point in the REPL's history.
+-- | What command was sent, and at what line in the REPL's history.
 data Interaction = Interaction Input !Int
                  deriving (Eq,Show)
 
-type InteractionId = Int
+type Interactions = Seq Interaction
 
-data Interactions = Interactions !Int !(IntMap Interaction)
-                    deriving Show
-
-
-addInteraction :: History -> Input -> Interactions -> (InteractionId,Interactions)
-addInteraction history input (Interactions nextId byId) =  
-    let segment = Interaction input (Data.Sequence.length history)
-     in (nextId, Interactions (succ nextId) (insert nextId segment byId)) 
+addInteraction :: History -> Input -> Interactions -> Interactions
+addInteraction history input interactions =  
+    let interaction = Interaction input (Data.Sequence.length history)
+     in interactions |> interaction 
 
 replServer :: STM History -> (Text -> STM ()) -> IO Application
-replServer historySTM write = do
-    ref <- atomically $ newTVar (Interactions 0 mempty)
+replServer historyM write = do
+    interactionsV <- atomically $ newTVar mempty
     pure $ serve (Proxy @ReplAPI) 
-                 (     createInteraction ref historySTM write 
-                  :<|> readInteraction ref historySTM
-                  :<|> readHistory historySTM)
+                 (     createInteraction interactionsV historyM write 
+                  :<|> readInteraction interactionsV historyM
+                  :<|> readHistory historyM)
 
 createInteraction
   :: TVar Interactions
@@ -58,11 +52,11 @@ createInteraction
   -> (Text -> STM ())
   -> Text
   -> Handler InteractionLink
-createInteraction ref historySTM write input = liftIO $ do
+createInteraction interactionsV historyM write input = liftIO $ do
   key <- atomically $ do
-    history             <- historySTM
-    (key, interactions) <- addInteraction history input <$> readTVar ref
-    writeTVar ref interactions
+    history <- historyM
+    key <- Data.Sequence.length <$> readTVar interactionsV
+    modifyTVar' interactionsV (addInteraction history input)
     write input
     pure key
   pure
@@ -72,18 +66,18 @@ readInteraction :: TVar Interactions
                 -> STM History 
                 -> Int 
                 -> Handler Data.Text.Lazy.Text
-readInteraction ref historySTM key = liftIO $ do
+readInteraction interactionsV historyM key = liftIO $ do
   atomically $ do
-    Interactions _ segments <- readTVar $ ref
-    history <- historySTM
-    let Just (Interaction _ start) = Data.IntMap.Strict.lookup key segments 
+    Just (Interaction  _ start) <- 
+        Data.Sequence.lookup key <$> readTVar interactionsV
+    history <- historyM
     return $ Data.Text.Lazy.unlines  
            $ toList
            $ Data.Sequence.drop start history 
 
 readHistory :: STM History -> Handler Data.Text.Lazy.Text
-readHistory historySTM = liftIO $ do
+readHistory historyM = liftIO $ do
   atomically $ do
-    history <- historySTM
+    history <- historyM
     pure $ Data.Text.Lazy.unlines (toList history)
 

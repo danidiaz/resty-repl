@@ -31,7 +31,6 @@ library
         RestyRepl.Server
   build-depends:
         base                 >= 4.10 && < 5,
-        streaming            >= 0.2.0.0 && < 0.3,
         process-streaming    >= 0.9.3.0 && < 0.10,
         servant-server       >= 0.14 && < 0.15,
         optparse-applicative >= 0.14 && < 0.15,
