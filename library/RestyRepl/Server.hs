@@ -69,7 +69,15 @@ readInteraction :: TVar Interactions
                 -> TVar History 
                 -> Int 
                 -> Handler Data.Text.Lazy.Text
-readInteraction ref historyRef interactionId = undefined
+readInteraction ref historyRef key = liftIO $ do
+  text <- atomically $ do
+        Interactions _ segments <- readTVar $ ref
+        history             <- readTVar $ historyRef
+        let Just (_,Segment start _) = Data.IntMap.Strict.lookup key segments 
+        return $ Data.Text.Lazy.unlines  
+               $ toList
+               $ Data.Sequence.drop start history 
+  pure text
 
 readHistory :: TVar History -> Handler Data.Text.Lazy.Text
 readHistory historyRef = liftIO $ do
