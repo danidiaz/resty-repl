@@ -41,7 +41,7 @@ backgroundRepl :: FilePath
                -> IO (STM History, Text -> STM (), IO ())
 backgroundRepl executable arguments = do
     inputQueue <- atomically $ newTQueue @Text
-    historyRef <- atomically $ newTVar @History mempty
+    historyV <- atomically $ newTVar @History mempty
     let execution = 
             executeInteractive 
             (piped (proc executable arguments))
@@ -56,8 +56,8 @@ backgroundRepl executable arguments = do
         writeToHistory = 
             withConsumer $ 
             forever (do line <- await
-                        liftIO . atomically $ modifyTVar' historyRef (|> line))
-    pure $ (,,) (readTVar historyRef)
+                        liftIO . atomically $ modifyTVar' historyV (|> line))
+    pure $ (,,) (readTVar historyV)
                 (\text -> writeTQueue inputQueue text) 
                 execution
 
