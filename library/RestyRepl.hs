@@ -33,12 +33,12 @@ type Line    = Data.Text.Lazy.Text
 type History = Seq Line
 
 -- | Given the full path to an executable and the arguments it should take,
---   return a function to write to stdin, an action that gets
---   history of the REPL session, and an action that actually executes
---   REPL session.
+-- return an action that gets the history of the REPL session, a function
+-- to send input to the REPL, and an action that actually executes the REPL
+-- session.
 backgroundRepl :: FilePath 
                -> [String] 
-               -> IO (TVar History, Text -> STM (), IO ())
+               -> IO (STM History, Text -> STM (), IO ())
 backgroundRepl executable arguments = do
     inputQueue <- atomically $ newTQueue @Text
     historyRef <- atomically $ newTVar @History mempty
@@ -57,7 +57,7 @@ backgroundRepl executable arguments = do
             withConsumer $ 
             forever (do line <- await
                         liftIO . atomically $ modifyTVar' historyRef (|> line))
-    pure $ (,,) historyRef
+    pure $ (,,) (readTVar historyRef)
                 (\text -> writeTQueue inputQueue text) 
                 execution
 
