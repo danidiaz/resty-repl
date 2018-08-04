@@ -44,6 +44,6 @@ optionsParserInfo =
 defaultMain :: IO ()
 defaultMain = do
     o <- execParser optionsParserInfo
-    (historyRef,write,repl) <- backgroundRepl (executable o) (arguments o)
-    server <- replServer historyRef write
+    (historyM,write,repl) <- backgroundRepl (executable o) (arguments o)
+    server <- replServer historyM write
     concurrently_ repl (run (port o) server)
