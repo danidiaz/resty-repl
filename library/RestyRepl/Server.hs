@@ -24,7 +24,11 @@ import           RestyRepl.API
 
 type Input = Text 
 
-data Segment = Segment !Int !(Maybe Int) 
+type Line = Data.Text.Lazy.Text
+
+type History = Seq Line
+
+data Segment = Segment !Int
                deriving (Eq,Show)
 
 type InteractionId = Int
@@ -32,13 +36,10 @@ type InteractionId = Int
 data Interactions = Interactions !Int !(IntMap (Input, Segment))
                     deriving Show
 
-type Line = Data.Text.Lazy.Text
-
-type History = Seq Line
 
 addInteraction :: History -> Input -> Interactions -> (InteractionId,Interactions)
 addInteraction history input (Interactions nextId byId) =  
-    let segment = Segment (Data.Sequence.length history) Nothing
+    let segment = Segment (Data.Sequence.length history)
      in (nextId, Interactions (succ nextId) (insert nextId (input,segment) byId)) 
 
 replServer :: TVar History -> (Text -> STM ()) -> IO Application
@@ -73,7 +74,7 @@ readInteraction ref historyRef key = liftIO $ do
   text <- atomically $ do
         Interactions _ segments <- readTVar $ ref
         history             <- readTVar $ historyRef
-        let Just (_,Segment start _) = Data.IntMap.Strict.lookup key segments 
+        let Just (_,Segment start) = Data.IntMap.Strict.lookup key segments 
         return $ Data.Text.Lazy.unlines  
                $ toList
                $ Data.Sequence.drop start history 

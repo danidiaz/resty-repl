@@ -42,7 +42,8 @@ library
         aeson                >= 1.4 && < 1.5,
         servant              >= 0.14 && < 0.15,
         servant-server       >= 0.14 && < 0.15,
-        warp                 >= 3.2 && < 3.3
+        warp                 >= 3.2 && < 3.3,
+        async                >= 2.2 && < 2.3                
   hs-source-dirs:      library
   default-language:    Haskell2010
 

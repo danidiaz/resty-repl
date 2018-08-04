@@ -3,7 +3,7 @@
 module RestyRepl (
         Line
     ,   History
-    ,   repl
+    ,   backgroundRepl
     ) where
 
 import           Data.Sequence
@@ -36,10 +36,10 @@ type History = Seq Line
 --   return a function to write to stdin, an action that gets
 --   history of the REPL session, and an action that actually executes
 --   REPL session.
-repl :: FilePath 
-     -> [String] 
-     -> IO (TVar History, Text -> STM (), IO ())
-repl executable arguments = do
+backgroundRepl :: FilePath 
+               -> [String] 
+               -> IO (TVar History, Text -> STM (), IO ())
+backgroundRepl executable arguments = do
     inputQueue <- atomically $ newTQueue @Text
     historyRef <- atomically $ newTVar @History mempty
     let execution = 

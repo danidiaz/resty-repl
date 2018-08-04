@@ -10,7 +10,8 @@ To build:
 
 To run: 
 
-    cabal new-exec -- restyrepl --help
+    cabal new-exec -- resty-repl --help
+    cabal new-exec -- resty-repl -p 8000 -e "/usr/local/bin/ghci"
 
 # Motivation
 
