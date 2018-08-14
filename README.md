@@ -24,7 +24,7 @@ already emitted some output. That it left to the client.
 
   Returns the link to an "interaction" resource.
 
-- POST `/interaction/:id` 
+- GET `/interaction/:id` 
 
   Shows the repl's stdout from the point the command :id was sent.
 
